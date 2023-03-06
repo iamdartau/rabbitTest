@@ -16,51 +16,52 @@ import org.springframework.retry.annotation.EnableRetry;
 import org.springframework.retry.annotation.Retryable;
 
 @SpringBootApplication
-@EnableRetry
+//@EnableRetry
 public class RabbitFailTestProducerApplication {
 
-	static public final String topicExchangeName = "spring-boot-exchange";
+  static public final String topicExchangeName = "spring-boot-exchange";
 
-	static final String queueName = "spring-boot";
-/**
- * поставить конкретный exception для очереди вместо Exception
- * */
-	@Bean
-	@Retryable(include = {Exception.class}, maxAttempts = 3, backoff = @Backoff(delay = 1000))
-	Queue queue() {
-		return new Queue(queueName, false);
-	}
+  static final String queueName = "spring-boot";
 
-	@Bean
-	TopicExchange exchange() {
-		return new TopicExchange(topicExchangeName);
-	}
+  /**
+   * поставить конкретный exception для очереди вместо Exception
+   */
+  @Bean
+//	@Retryable(include = {Exception.class}, maxAttempts = 3, backoff = @Backoff(delay = 1000))
+  Queue queue() {
+    return new Queue(queueName, false);
+  }
 
-	@Bean
-	Binding binding(Queue queue, TopicExchange exchange) {
-		return BindingBuilder.bind(queue).to(exchange).with("foo.bar.#");
-	}
+  @Bean
+  TopicExchange exchange() {
+    return new TopicExchange(topicExchangeName);
+  }
 
-	@Bean
-	SimpleMessageListenerContainer container(ConnectionFactory connectionFactory,
-			MessageListenerAdapter listenerAdapter) {
-		SimpleMessageListenerContainer container = new SimpleMessageListenerContainer();
-		container.setConnectionFactory(connectionFactory);
-		container.setQueueNames(queueName);
-		container.setMessageListener(listenerAdapter);
-		return container;
-	}
+  @Bean
+  Binding binding(Queue queue, TopicExchange exchange) {
+    return BindingBuilder.bind(queue).to(exchange).with("foo.bar.#");
+  }
 
-	@Bean
-	MessageListenerAdapter listenerAdapter(Receiver receiver) {
-		return new MessageListenerAdapter(receiver, "receiveMessage");
-	}
+  @Bean
+  SimpleMessageListenerContainer container(
+      ConnectionFactory connectionFactory,
+      MessageListenerAdapter listenerAdapter) {
+    SimpleMessageListenerContainer container = new SimpleMessageListenerContainer();
+    container.setConnectionFactory(connectionFactory);
+    container.setQueueNames(queueName);
+    container.setMessageListener(listenerAdapter);
+    return container;
+  }
 
-	public static void main(String[] args) {
-		SpringApplication.run(RabbitFailTestProducerApplication.class, args);
+  @Bean
+  MessageListenerAdapter listenerAdapter(Receiver receiver) {
+    return new MessageListenerAdapter(receiver, "receiveMessage");
+  }
+
+  public static void main(String[] args) {
+    SpringApplication.run(RabbitFailTestProducerApplication.class, args);
 
 
-
-	}
+  }
 
 }
